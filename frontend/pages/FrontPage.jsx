@@ -1,8 +1,7 @@
-"use client";
-
 import { useState } from "react";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import logo from "../src/assets/esclogo.png";
+import bottomLogo from "../src/assets/ministryLogo.png"; // Import your bottom logo here
 
 // Mock function to simulate fetching student data
 const fetchStudentData = async (id) => {
@@ -34,13 +33,11 @@ const fetchStudentData = async (id) => {
   return students[id] || null;
 };
 
-export default function LandingPage() {
+export default function FrontPage() { 
   const [studentId, setStudentId] = useState("");
-  const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showLmsPassword, setShowLmsPassword] = useState(false);
-  const [showAlefPassword, setShowAlefPassword] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,41 +46,26 @@ export default function LandingPage() {
     try {
       const data = await fetchStudentData(studentId);
       if (data) {
-        setStudentData(data);
+        navigate(`/student/${studentId}`); // Navigate to the StudentDetails page
       } else {
         setError("Student not found");
-        setStudentData(null);
       }
     } catch (err) {
       setError("An error occurred while fetching student data");
-      setStudentData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const togglePasswordVisibility = (field) => {
-    if (field === "lms") {
-      setShowLmsPassword(!showLmsPassword);
-    } else {
-      setShowAlefPassword(!showAlefPassword);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E6DDD7] via-[#F5ECE6] to-[#B2B0A1] flex flex-col items-center  p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#E6DDD7] via-[#F5ECE6] to-[#B2B0A1] flex flex-col items-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
-        {/* Header with logo and title */}
         <div className="flex flex-col items-center justify-between ">
-          {/* Add your logo here */}
           <img src={logo} alt="Logo" className="h-4 w-4" />
         </div>
 
         <div className="bg-white/80 backdrop-blur-sm shadow-md rounded-lg overflow-hidden">
           <div className="p-4 sm:p-6">
-            <p className="text-[#A9A7A0] text-xs sm:text-sm mb-4 sm:mb-6 text-center">
-              Al Khalil Bin Ahmed Secondary School - C3
-            </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                 <input
@@ -100,30 +82,7 @@ export default function LandingPage() {
                     loading ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  {loading ? (
-                    <svg
-                      className="animate-spin h-5 w-5 text-white mx-auto"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                  ) : (
-                    "View Details"
-                  )}
+                  {loading ? "Loading..." : "View Details"}
                 </button>
               </div>
             </form>
@@ -133,58 +92,14 @@ export default function LandingPage() {
                 {error}
               </p>
             )}
-
-            {studentData && (
-              <div className="mt-6 sm:mt-8">
-                <h3 className="text-lg sm:text-xl font-normal mb-3 sm:mb-4 text-[#6E6658]">
-                  Student Details
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {Object.entries(studentData).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="bg-[#F5ECE6]/70 backdrop-blur-sm p-2 sm:p-3 rounded-md"
-                    >
-                      <p className="font-normal text-[#A9A7A0] text-xs capitalize">
-                        {key.replace(/([A-Z])/g, " $1").trim()}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[#6E6658] text-xs sm:text-sm flex-grow">
-                          {key === "lmsPassword"
-                            ? showLmsPassword
-                              ? value
-                              : "********"
-                            : key === "alefPassword"
-                            ? showAlefPassword
-                              ? value
-                              : "********"
-                            : value}
-                        </p>
-                        {(key === "lmsPassword" || key === "alefPassword") && (
-                          <button
-                            onClick={() =>
-                              togglePasswordVisibility(
-                                key === "lmsPassword" ? "lms" : "alef"
-                              )
-                            }
-                            className="ml-2 text-[#6E6658] hover:text-[#A9A7A0] transition-colors duration-200"
-                          >
-                            {(key === "lmsPassword" && showLmsPassword) ||
-                            (key === "alefPassword" && showAlefPassword) ? (
-                              <EyeOffIcon className="h-4 w-4" />
-                            ) : (
-                              <EyeIcon className="h-4 w-4" />
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Bottom Logo */}
+        <div className="flex justify-center mt-4">
+          <img src={bottomLogo} alt="Bottom Logo" className="" /> {/* Adjust size as needed */}
+        </div>
+        
       </div>
     </div>
   );
